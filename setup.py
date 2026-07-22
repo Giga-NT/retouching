@@ -1,0 +1,8 @@
+from setuptools import setup
+from Cython.Build import cythonize
+
+setup(
+    ext_modules=cythonize("app.py", compiler_directives={'language_level': 3})
+)
+
+# python setup.py build_ext --inplace

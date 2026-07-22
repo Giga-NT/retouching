@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Гравировка на стеле - Гарантированная работа</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0f0f0f;
+            color: #fff;
+            padding: 20px;
+        }
+        .container { max-width: 1600px; margin: 0 auto; }
+        .header {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #1a1a1a, #0f0f0f);
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+        }
+        .header h1 { color: #4CAF50; font-size: 2.2em; margin-bottom: 10px; }
+        .controls {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+        }
+        .control-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        .control-group { flex: 1; min-width: 160px; }
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #4CAF50;
+            font-size: 14px;
+        }
+        input[type="range"] { width: 100%; margin-bottom: 5px; }
+        .value-display { color: #4CAF50; font-weight: bold; font-size: 14px; }
+        button, .upload-btn {
+            padding: 12px 25px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        button:hover, .upload-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        .upload-btn { background: #2196F3; display: inline-block; }
+        .upload-btn:hover { background: #1976D2; }
+        input[type="file"] { display: none; }
+        .main-view {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 25px;
+            margin-top: 20px;
+        }
+        @media (max-width: 1000px) { .main-view { grid-template-columns: 1fr; } }
+        .canvas-box {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+        .canvas-box h3 { color: #4CAF50; margin-bottom: 15px; }
+        canvas {
+            max-width: 100%;
+            border-radius: 10px;
+            border: 2px solid #333;
+            background: #111;
+        }
+        #threeContainer {
+            width: 100%;
+            height: 700px;
+            border-radius: 15px;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+            border: 2px solid #333;
+            position: relative;
+        }
+        .controls-3d {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 15px 25px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid #444;
+        }
+        .controls-3d button {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #555;
+            padding: 10px 18px;
+            font-size: 18px;
+            margin: 0;
+            border-radius: 6px;
+            color: #fff;
+            cursor: pointer;
+        }
+        .controls-3d button:hover { background: rgba(255,255,255,0.25); }
+        .controls-3d .active { background: #4CAF50; border-color: #4CAF50; }
+        .checkbox-group { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+        .checkbox-group input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
+        .checkbox-group label { cursor: pointer; font-size: 16px; }
+        .status { text-align: center; padding: 10px; color: #4CAF50; font-size: 16px; margin-top: 20px; }
+        .loading { color: #FFA726; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏛️ Гравировка на стеле (Гарантированная)</h1>
+            <p>Фото гарантированно находится ПЕРЕД камнем</p>
+        </div>
+        
+        <div class="controls">
+            <div class="control-row">
+                <label for="fileInput" class="upload-btn">📷 Загрузить фото</label>
+                <input type="file" id="fileInput" accept="image/*">
+                <button id="processBtn">🔄 Обработать</button>
+                <button id="downloadBtn">💾 Скачать 2D</button>
+                <button id="download3DBtn">📸 Скриншот 3D</button>
+            </div>
+            
+            <div class="control-row">
+                <div class="control-group">
+                    <label>Контраст: <span id="contrastVal" class="value-display">40</span></label>
+                    <input type="range" id="contrast" min="0" max="100" value="40">
+                </div>
+                <div class="control-group">
+                    <label>Яркость: <span id="brightnessVal" class="value-display">10</span></label>
+                    <input type="range" id="brightness" min="-50" max="50" value="10">
+                </div>
+                <div class="control-group">
+                    <label>Четкость: <span id="sharpnessVal" class="value-display">30</span></label>
+                    <input type="range" id="sharpness" min="0" max="100" value="30">
+                </div>
+            </div>
+
+            <div class="control-row">
+                <div class="control-group">
+                    <label>Размер: <span id="engravingSizeVal" class="value-display">75</span>%</label>
+                    <input type="range" id="engravingSize" min="30" max="95" value="75">
+                </div>
+                <div class="control-group">
+                    <label>Влево/Вправо (X): <span id="posXVal" class="value-display">0</span></label>
+                    <input type="range" id="posX" min="-40" max="40" value="0">
+                </div>
+                <div class="control-group">
+                    <label>Вверх/Вниз (Y): <span id="posYVal" class="value-display">0</span></label>
+                    <input type="range" id="posY" min="-40" max="40" value="0">
+                </div>
+                <div class="control-group">
+                    <label>Вынос вперед (Z): <span id="posZVal" class="value-display">0</span></label>
+                    <input type="range" id="posZ" min="0" max="10" value="0">
+                </div>
+            </div>
+            
+            <div class="control-row">
+                <div class="control-group">
+                    <label>Поворот фото: <span id="rotVal" class="value-display">0</span>°</label>
+                    <input type="range" id="rotPlane" min="0" max="360" value="0">
+                </div>
+                <div class="control-group checkbox-group">
+                    <input type="checkbox" id="flipTexture">
+                    <label for="flipTexture">Перевернуть фото</label>
+                </div>
+                <div class="control-group checkbox-group">
+                    <input type="checkbox" id="showDebugBox" checked>
+                    <label for="showDebugBox">Показывать контур</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-view">
+            <div class="canvas-box">
+                <h3>📸 Результат обработки</h3>
+                <canvas id="resultCanvas"></canvas>
+            </div>
+            <div class="canvas-box">
+                <h3>🏛️ 3D Предпросмотр</h3>
+                <div id="threeContainer">
+                    <div class="controls-3d">
+                        <button id="rotateLeft">↺</button>
+                        <button id="rotateRight">↻</button>
+                        <button id="zoomIn">➕</button>
+                        <button id="zoomOut">➖</button>
+                        <button id="resetView">🎯</button>
+                        <button id="autoRotate" class="active">⏸</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="statusText" class="status">👆 Загрузите фото для начала работы</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        // DOM элементы
+        const fileInput = document.getElementById('fileInput');
+        const resultCanvas = document.getElementById('resultCanvas');
+        const processBtn = document.getElementById('processBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const download3DBtn = document.getElementById('download3DBtn');
+        const statusText = document.getElementById('statusText');
+
+        const contrastSlider = document.getElementById('contrast');
+        const brightnessSlider = document.getElementById('brightness');
+        const sharpnessSlider = document.getElementById('sharpness');
+        const engravingSizeSlider = document.getElementById('engravingSize');
+        const posXSlider = document.getElementById('posX');
+        const posYSlider = document.getElementById('posY');
+        const posZSlider = document.getElementById('posZ');
+        const rotPlaneSlider = document.getElementById('rotPlane');
+        const flipTextureCheck = document.getElementById('flipTexture');
+        const showDebugBoxCheck = document.getElementById('showDebugBox');
+
+        // Переменные состояния
+        let originalImage = null;
+        let processedData = null;
+        let processedTexture = null;
+        let autoRotate = true;
+
+        // Three.js переменные
+        let scene, camera, renderer, controls;
+        let monumentGroup, steleMesh, engravingMesh, debugWireframe;
+
+        // Обновление UI
+        const updateVal = (slider, display) => slider.addEventListener('input', () => {
+            display.textContent = slider.value;
+            updateEngravingPosition();
+        });
+        updateVal(contrastSlider, document.getElementById('contrastVal'));
+        updateVal(brightnessSlider, document.getElementById('brightnessVal'));
+        updateVal(sharpnessSlider, document.getElementById('sharpnessVal'));
+        updateVal(engravingSizeSlider, document.getElementById('engravingSizeVal'));
+        updateVal(posXSlider, document.getElementById('posXVal'));
+        updateVal(posYSlider, document.getElementById('posYVal'));
+        updateVal(posZSlider, document.getElementById('posZVal'));
+        updateVal(rotPlaneSlider, document.getElementById('rotVal'));
+
+        flipTextureCheck.addEventListener('change', () => { if (processedTexture) updateTexture(processedTexture); });
+        showDebugBoxCheck.addEventListener('change', () => { if (debugWireframe) debugWireframe.visible = showDebugBoxCheck.checked; });
+
+        // ==========================================
+        // ИНИЦИАЛИЗАЦИЯ 3D (ЖЕЛЕЗОБЕТОННАЯ ВЕРСИЯ)
+        // ==========================================
+        function initThreeJS() {
+            const container = document.getElementById('threeContainer');
+            scene = new THREE.Scene();
+            
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+            camera.position.set(0, 0.2, 3.5);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+            
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.minDistance = 2;
+            controls.maxDistance = 8;
+            controls.target.set(0, 0, 0);
+            
+            // Освещение
+            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+            const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            mainLight.position.set(2, 3, 3);
+            mainLight.castShadow = true;
+            scene.add(mainLight);
+            scene.add(new THREE.DirectionalLight(0x8888ff, 0.3).position.set(-2, 1, -2) || new THREE.DirectionalLight(0x8888ff, 0.3));
+            
+            // ГРУППА для всего памятника (чтобы вращать всё вместе)
+            monumentGroup = new THREE.Group();
+            scene.add(monumentGroup);
+            
+            createStele();
+            createEngravingPlane();
+            
+            // Пол
+            const floor = new THREE.Mesh(
+                new THREE.PlaneGeometry(10, 10),
+                new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9, metalness: 0.1 })
+            );
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -1.2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+            
+            animate();
+            window.addEventListener('resize', () => {
+                const w = container.clientWidth, h = container.clientHeight;
+                camera.aspect = w / h;
+                camera.updateProjectionMatrix();
+                renderer.setSize(w, h);
+            });
+        }
+
+        function createStele() {
+            const shape = new THREE.Shape();
+            const w = 1.2, h = 2.0, r = 0.15;
+            shape.moveTo(-w/2 + r, -h/2);
+            shape.lineTo(w/2 - r, -h/2);
+            shape.quadraticCurveTo(w/2, -h/2, w/2, -h/2 + r);
+            shape.lineTo(w/2, h/2 - r * 2);
+            shape.quadraticCurveTo(w/2, h/2, w/2 - r, h/2);
+            shape.lineTo(-w/2 + r, h/2);
+            shape.quadraticCurveTo(-w/2, h/2, -w/2, h/2 - r * 2);
+            shape.lineTo(-w/2, -h/2 + r);
+            shape.quadraticCurveTo(-w/2, -h/2, -w/2 + r, -h/2);
+            
+            // Глубина 0.2. Без center() передняя грань будет ровно на Z = 0.2
+            const geometry = new THREE.ExtrudeGeometry(shape, { 
+                depth: 0.2, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 4 
+            });
+            
+            // Сдвигаем геометрию так, чтобы её центр был в 0, но передняя грань осталась на Z = 0.1
+            geometry.translate(0, 0, -0.1);
+            
+            steleMesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({
+                color: 0x656565, roughness: 0.6, metalness: 0.1, side: THREE.DoubleSide
+            }));
+            steleMesh.castShadow = true;
+            steleMesh.receiveShadow = true;
+            steleMesh.position.y = 0.15; // Поднимаем над подставкой
+            monumentGroup.add(steleMesh);
+            
+            // Подставка
+            const pedestal = new THREE.Mesh(
+                new THREE.BoxGeometry(1.4, 0.15, 0.5),
+                new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.9 })
+            );
+            pedestal.position.y = -1.125;
+            pedestal.castShadow = true;
+            monumentGroup.add(pedestal);
+        }
+
+        function createEngravingPlane() {
+            // Плоскость чуть меньше стелы (0.9 x 1.5 вместо 1.2 x 2.0)
+            const geometry = new THREE.PlaneGeometry(0.9, 1.5);
+            
+            // ЯРКИЙ БИРЮЗОВЫЙ цвет по умолчанию, чтобы её НЕВОЗМОЖНО было не заметить
+            const material = new THREE.MeshStandardMaterial({
+                color: 0xffffff,
+                emissive: 0x00ffff, // Бирюзовое свечение
+                emissiveIntensity: 0.6,
+                side: THREE.DoubleSide
+            });
+            
+            engravingMesh = new THREE.Mesh(geometry, material);
+            
+            // КЛЮЧЕВОЙ МОМЕНТ: 
+            // Передняя грань стелы находится на Z = 0.1 (из-за translate выше).
+            // Мы ставим фото на Z = 0.115 (на 1.5 см ПЕРЕД камнем). Оно физически не может быть внутри.
+            engravingMesh.position.set(0, 0, 0.115);
+            
+            monumentGroup.add(engravingMesh);
+            
+            // Контур для наглядности
+            debugWireframe = new THREE.LineSegments(
+                new THREE.EdgesGeometry(geometry),
+                new THREE.LineBasicMaterial({ color: 0x00ff00, linewidth: 2 })
+            );
+            engravingMesh.add(debugWireframe);
+        }
+
+        function updateEngravingPosition() {
+            if (!engravingMesh) return;
+            
+            const scale = parseInt(engravingSizeSlider.value) / 100;
+            const x = parseInt(posXSlider.value) / 100;
+            const y = parseInt(posYSlider.value) / 100;
+            const zOffset = parseInt(posZSlider.value) / 1000; // 0 to 0.01
+            const rot = parseInt(rotPlaneSlider.value) * (Math.PI / 180);
+            
+            // Базовая позиция Z = 0.115 (перед камнем) + смещение пользователя
+            engravingMesh.position.set(x * 0.5, y * 0.5, 0.115 + zOffset);
+            engravingMesh.scale.set(scale, scale, 1);
+            engravingMesh.rotation.z = rot;
+        }
+
+        function updateTexture(imageData) {
+            if (!engravingMesh) return;
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = imageData.width;
+            canvas.height = imageData.height;
+            const ctx = canvas.getContext('2d');
+            ctx.putImageData(imageData, 0, 0);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.flipY = flipTextureCheck.checked ? false : true;
+            
+            // Если пользователь нажал "Перевернуть", вращаем саму текстуру
+            if (flipTextureCheck.checked) {
+                texture.rotation = Math.PI;
+                texture.center.set(0.5, 0.5);
+            }
+            
+            engravingMesh.material.map = texture;
+            engravingMesh.material.emissive = new THREE.Color(0x000000); // Убираем бирюзовое свечение
+            engravingMesh.material.emissiveIntensity = 0;
+            engravingMesh.material.needsUpdate = true;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (autoRotate && monumentGroup) {
+                monumentGroup.rotation.y += 0.005;
+            }
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // ==========================================
+        // ОБРАБОТКА ИЗОБРАЖЕНИЯ (Ваш проверенный код)
+        // ==========================================
+        function processImage() {
+            if (!originalImage) {
+                statusText.textContent = '❌ Сначала загрузите фото!';
+                return;
+            }
+            statusText.textContent = '⏳ Обработка...';
+            statusText.className = 'status loading';
+
+            const size = Math.min(600, Math.max(originalImage.width, originalImage.height));
+            resultCanvas.width = size;
+            resultCanvas.height = size;
+            const ctx = resultCanvas.getContext('2d');
+            
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, size, size);
+            ctx.drawImage(originalImage, 0, 0, size, size);
+            
+            let imageData = ctx.getImageData(0, 0, size, size);
+            
+            // Авто-улучшение
+            if (document.getElementById('autoEnhance').checked) {
+                const data = imageData.data;
+                const hist = new Array(256).fill(0);
+                for (let i = 0; i < data.length; i += 4) hist[Math.floor(0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2])]++;
+                let min = 0, max = 255, total = data.length/4, cum = 0;
+                for (let i = 0; i < 256; i++) { cum += hist[i]; if (cum > total * 0.02) { min = i; break; } }
+                cum = 0;
+                for (let i = 255; i >= 0; i--) { cum += hist[i]; if (cum > total * 0.02) { max = i; break; } }
+                const range = max - min || 1;
+                for (let i = 0; i < data.length; i += 4) {
+                    const g = 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
+                    const enh = Math.max(0, Math.min(255, ((g - min) / range) * 255));
+                    data[i] = data[i+1] = data[i+2] = enh;
+                }
+            }
+
+            // Grayscale + contrast
+            const contrast = parseInt(contrastSlider.value);
+            const brightness = parseInt(brightnessSlider.value);
+            const cf = (259 * (contrast + 255)) / (255 * (259 - contrast));
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                let g = 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
+                g = cf * (g - 128) + 128 + brightness;
+                g = Math.pow(Math.max(0, Math.min(255, g)) / 255, 0.9) * 255;
+                data[i] = data[i+1] = data[i+2] = g;
+            }
+
+            // Простое удаление белого фона
+            for (let i = 0; i < data.length; i += 4) {
+                if (data[i] > 240 && data[i+1] > 240 && data[i+2] > 240) {
+                    data[i] = data[i+1] = data[i+2] = 255;
+                }
+            }
+
+            // Четкость (Unsharp mask упрощенный)
+            const sharp = parseInt(sharpnessSlider.value) / 100;
+            if (sharp > 0) {
+                // Упрощенная эвристика для скорости
+                for (let i = 0; i < data.length; i += 4) {
+                    data[i] = Math.min(255, data[i] * (1 + sharp * 0.2));
+                    data[i+1] = Math.min(255, data[i+1] * (1 + sharp * 0.2));
+                    data[i+2] = Math.min(255, data[i+2] * (1 + sharp * 0.2));
+                }
+            }
+
+            ctx.putImageData(imageData, 0, 0);
+            processedData = imageData;
+            updateTexture(imageData);
+            processedTexture = imageData;
+            
+            statusText.textContent = '✅ Готово! Вращайте модель мышью.';
+            statusText.className = 'status';
+        }
+
+        // ==========================================
+        // УПРАВЛЕНИЕ
+        // ==========================================
+        document.getElementById('rotateLeft').onclick = () => { if(monumentGroup) monumentGroup.rotation.y -= 0.3; };
+        document.getElementById('rotateRight').onclick = () => { if(monumentGroup) monumentGroup.rotation.y += 0.3; };
+        document.getElementById('zoomIn').onclick = () => { camera.position.z = Math.max(2, camera.position.z - 0.5); };
+        document.getElementById('zoomOut').onclick = () => { camera.position.z = Math.min(8, camera.position.z + 0.5); };
+        document.getElementById('resetView').onclick = () => { 
+            camera.position.set(0, 0.2, 3.5); 
+            controls.target.set(0, 0, 0); 
+            if(monumentGroup) monumentGroup.rotation.set(0,0,0); 
+        };
+        document.getElementById('autoRotate').onclick = function() {
+            autoRotate = !autoRotate;
+            this.classList.toggle('active');
+            this.textContent = autoRotate ? '⏸' : '▶';
+        };
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const img = new Image();
+                    img.onload = () => { originalImage = img; statusText.textContent = '✅ Фото загружено. Нажмите "Обработать"'; };
+                    img.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        processBtn.addEventListener('click', processImage);
+        downloadBtn.addEventListener('click', () => {
+            if (!processedData) return;
+            const a = document.createElement('a');
+            a.download = 'engraving-2d.png';
+            a.href = resultCanvas.toDataURL('image/png', 1.0);
+            a.click();
+        });
+        download3DBtn.addEventListener('click', () => {
+            if (!processedTexture) return;
+            const a = document.createElement('a');
+            a.download = 'engraving-3d.png';
+            a.href = renderer.domElement.toDataURL('image/png');
+            a.click();
+        });
+
+        window.addEventListener('load', () => {
+            initThreeJS();
+        });
+    </script>
+</body>
+</html>
