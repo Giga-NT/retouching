@@ -9,7 +9,7 @@
     <script src="{{ url_for('static', filename='libs/three.min.js') }}"></script>
     <script src="{{ url_for('static', filename='libs/OrbitControls.js') }}"></script>
     <script src="{{ url_for('static', filename='libs/DecalGeometry.js') }}"></script>
-	<script src="{{ url_for('static', filename='libs/GLTFLoader.js') }}"></script> 
+    <script src="{{ url_for('static', filename='libs/GLTFLoader.js') }}"></script> 
     
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
@@ -19,12 +19,10 @@
         <!-- Верхняя панель -->
         <div class="top-bar" style="display:flex; justify-content:space-between; align-items:center; padding:10px 20px; background:#111; border-radius:12px; margin-bottom:15px; border:1px solid #333;">
             <div style="display:flex; align-items:center; gap:15px;">
-                <!-- Логотип -->
                 <a href="/" style="display:flex; align-items:center; gap:12px; text-decoration:none;">
                     <img src="{{ url_for('static', filename='images/logo.png') }}" 
                          alt="Giga-NT" 
-                         style="height:50px; width:auto; 
-                                filter: drop-shadow(0 0 20px rgba(124,252,0,0.1));">
+                         style="height:50px; width:auto; filter: drop-shadow(0 0 20px rgba(124,252,0,0.1));">
                 </a>
             </div>
             <div style="display:flex; align-items:center; gap:15px;">
@@ -101,11 +99,7 @@
                             <input type="range" id="depthSlider" min="0.3" max="1.0" step="0.05" value="0.9">
                             <span class="value" id="depthValue">0.9</span>
                         </div>
-                        <div class="settings-row">
-                            <label>Ореол:</label>
-                            <input type="range" id="haloSlider" min="0" max="80" value="35">
-                            <span class="value" id="haloValue">35</span>
-                        </div>
+
                         <div class="settings-row">
                             <label>Контраст:</label>
                             <input type="range" id="contrastSlider" min="1.0" max="4.0" step="0.1" value="3.0">
@@ -116,6 +110,44 @@
                             <input type="range" id="brightnessSlider" min="-50" max="50" value="0">
                             <span class="value" id="brightnessValue">0</span>
                         </div>
+
+						<!-- В разделе engravingSettings, после существующих настроек -->
+						<div class="section-title">✨ Ореол (нимб)</div>
+						<div class="settings-group" style="background:#1a1a2a; border-radius:6px; padding:10px; border:1px solid #2a4a4a;">
+							<div class="settings-row">
+								<label>Включить ореол:</label>
+								<input type="checkbox" id="haloEnabled" checked style="width:auto; accent-color:#4CAF50;">
+							</div>
+							<div class="settings-row">
+								<label>Плотность:</label>
+								<input type="range" id="haloDensity" min="0" max="100" value="50">
+								<span class="value" id="haloDensityValue">50%</span>
+							</div>
+							<div class="settings-row">
+								<label>Размер:</label>
+								<input type="range" id="haloSize" min="50" max="400" value="180">
+								<span class="value" id="haloSizeValue">180</span>
+							</div>
+							<div class="settings-row">
+								<label>Яркость:</label>
+								<input type="range" id="haloBrightness" min="0" max="100" value="60">
+								<span class="value" id="haloBrightnessValue">60%</span>
+							</div>
+							<div class="settings-row">
+								<label>Размытие края:</label>
+								<input type="range" id="haloBlur" min="0" max="100" value="50">
+								<span class="value" id="haloBlurValue">50%</span>
+							</div>
+							<div style="color:#888; font-size:11px; text-align:center; padding:5px;">
+								💡 Ореол создает свечение вокруг силуэта изображения
+							</div>
+							<div class="settings-row">
+								<label>Смещение ореола:</label>
+								<input type="range" id="haloShift" min="-50" max="50" value="0">
+								<span class="value" id="haloShiftValue">0%</span>
+							</div>
+						</div>
+
                         <div class="settings-row">
                             <label>Камень:</label>
                             <select id="stoneSelect">
@@ -126,6 +158,7 @@
                                 <option value="basalt">🌋 Базальт</option>
                             </select>
                         </div>
+			
                     </div>
                 </div>
 
@@ -201,17 +234,16 @@
                     </div>
                     <div class="settings-row">
                         <label>Смещение Z:</label>
-                        <input type="range" id="offsetZSlider" min="-1.0" max="1.0" step="0.05" value="-0.10">
-                        <span class="value" id="offsetZValue">-0.10</span>
+                        <input type="range" id="offsetZSlider" min="-1.0" max="1.0" step="0.05" value="-0.15">
+                        <span class="value" id="offsetZValue">-0.15</span>
                     </div>
                 </div>
 
-				<div class="section-title">🏛️ Выберите стеллу</div>
-				<div class="stele-selector" id="steleSelector">
-					<div class="stele-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap:10px; margin:8px 0;">
-						<!-- Карточки будут генерироваться из JS -->
-					</div>
-				</div>
+                <div class="section-title">🏛️ Выберите стеллу</div>
+                <div class="stele-selector" id="steleSelector">
+                    <div class="stele-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap:10px; margin:8px 0;">
+                    </div>
+                </div>
 
                 <div class="section-title">🪨 Текстура стелы</div>
                 <div class="settings-group">
@@ -234,7 +266,6 @@
                 </div>
 
                 {% if user %}
-                    <!-- Кнопки только для авторизованных -->
                     <div class="controls">
                         <button class="btn btn-download" id="downloadBtn" disabled>💾 Скачать</button>
                         <button class="btn btn-print" id="printBtn" disabled>🖨️ Печать</button>
@@ -245,7 +276,6 @@
                         </button>
                     </div>
                 {% else %}
-                    <!-- Для гостей - только демонстрация -->
                     <div class="controls" style="border: 1px dashed #FF9800; border-radius: 8px; padding: 10px; text-align: center; background: rgba(255, 152, 0, 0.05); margin-top: 10px;">
                         <div style="color: #FF9800; font-size: 13px; margin-bottom: 5px;">
                             🔒 Для скачивания, печати и оформления заказа 
@@ -257,7 +287,6 @@
                             👆 Вы можете вращать 3D модель и смотреть демонстрацию
                         </div>
                     </div>
-                    <!-- Скрытые кнопки для гостей -->
                     <div style="display: none;">
                         <button class="btn btn-download" id="downloadBtn" disabled>💾 Скачать</button>
                         <button class="btn btn-print" id="printBtn" disabled>🖨️ Печать</button>
@@ -279,131 +308,150 @@
         </div>
     </div>
 
-    <!-- Форма для печати -->
-    <div id="printForm">
-        <div style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px;">
-            <div style="background:#1a1a1a; border-radius:16px; padding:30px; max-width:1100px; width:100%; max-height:90vh; overflow-y:auto; border:1px solid #4CAF50; position:relative;">
-                <button onclick="closePrintForm()" style="position:absolute; top:10px; right:15px; background:none; border:none; color:#888; font-size:28px; cursor:pointer; z-index:10;">✕</button>
+<!-- ФОРМА ДЛЯ ПЕЧАТИ -->
+<div id="printForm" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; padding:20px; overflow-y:auto;">
+    <div style="background:#1a1a1a; border-radius:16px; padding:30px; max-width:1100px; width:100%; max-height:95vh; overflow-y:auto; border:1px solid #4CAF50; position:relative;">
+        <button onclick="closePrintForm()" style="position:absolute; top:10px; right:15px; background:none; border:none; color:#888; font-size:28px; cursor:pointer; z-index:10;">✕</button>
+        
+        <div id="printContent">
+            
+			<!-- СТРАНИЦА 1 - СТЕЛЛА -->
+			<div class="print-page print-page-stela">
+				<h2 style="text-align:center; color:#4CAF50; margin-bottom:15px; font-size:22px;">📋 Эскиз стеллы</h2>
+				
+				<!-- ===== ПЕРЕКЛЮЧАТЕЛЬ ФОНА СТЕЛЛЫ ===== -->
+				<div style="display:flex; gap:15px; justify-content:center; margin-bottom:10px; background:rgba(0,0,0,0.3); padding:6px 15px; border-radius:8px; border:1px solid #333;">
+					<label style="cursor:pointer; display:flex; align-items:center; gap:6px; color:#aaa; font-size:12px;">
+						<input type="radio" name="stelaBackground" value="light" checked id="stelaBgLight">
+						<span style="display:inline-block; width:18px; height:18px; background:#f5f0eb; border:1px solid #888; border-radius:4px;"></span>
+						Светлый фон
+					</label>
+					<label style="cursor:pointer; display:flex; align-items:center; gap:6px; color:#aaa; font-size:12px;">
+						<input type="radio" name="stelaBackground" value="dark" id="stelaBgDark">
+						<span style="display:inline-block; width:18px; height:18px; background:#1a1a1a; border:1px solid #888; border-radius:4px;"></span>
+						Темный фон
+					</label>
+				</div>
+				
+				<!-- КОНТЕЙНЕР СТЕЛЛЫ -->
+				<div id="printStelaContainer" style="width:100%; max-width:900px; height:75vh; min-height:500px; background:#111; border-radius:12px; overflow:hidden; border:3px solid #4CAF50; box-shadow:0 0 30px rgba(76,175,80,0.2); position:relative; margin:0 auto;">
+					<canvas id="printCanvas" style="width:100%; height:100%; display:block; background:#111;"></canvas>
+				</div>
+				<div style="color:#888; font-size:12px; margin-top:10px; text-align:center;">* Изображение является предварительным эскизом. Окончательный вид может отличаться.</div>
+			</div>
+            
+            <!-- СТРАНИЦА 2 - ПАРАМЕТРЫ -->
+            <div class="print-page print-page-params">
+                <h2 style="text-align:center; color:#4CAF50; margin-bottom:20px; font-size:24px; border-bottom:2px solid #4CAF50; padding-bottom:10px;">📋 Детали заказа</h2>
                 
-                <div id="printContent" style="background:#0a0a0a; border-radius:12px; padding:20px;">
+                <!-- СЕТКА 2 КОЛОНКИ -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                     
-                    <!-- СТРАНИЦА 1 - СТЕЛЛА -->
-                    <div class="print-page-stela" style="page-break-after: always; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
-                        <h2 style="text-align:center; color:#4CAF50; margin-bottom:20px; font-size:24px;">📋 Эскиз стеллы</h2>
-                        
-                        <div style="width:100%; max-width:700px; height:70vh; display:flex; align-items:center; justify-content:center;">
-                            <div id="printStelaContainer" style="width:100%; height:100%; background:#111; border-radius:12px; overflow:hidden; border:3px solid #4CAF50; box-shadow:0 0 30px rgba(76,175,80,0.2); position:relative; display:flex; align-items:center; justify-content:center;">
-                                <div class="stela-label" style="position:absolute; top:15px; left:20px; background:rgba(0,0,0,0.75); padding:6px 20px; border-radius:4px; font-size:14px; color:#4CAF50; z-index:5; border:1px solid #4CAF50; font-weight:bold;">📐 Эскиз стеллы</div>
-                                <canvas id="printCanvas" style="width:100%; height:100%; display:block; object-fit:contain;"></canvas>
-                            </div>
-                        </div>
-                        <div style="color:#888; font-size:12px; margin-top:10px; text-align:center;">
-                            * Изображение является предварительным эскизом. Окончательный вид может отличаться.
+                    <!-- 1. Параметры стеллы -->
+                    <div style="background:#1a2a1a; padding:10px 14px; border-radius:8px; border:1px solid #2a4a2a;">
+                        <h4 style="color:#4CAF50; margin-bottom:6px; font-size:13px;">📐 Параметры стеллы</h4>
+                        <div style="font-size:12px; color:#ccc; line-height:1.6;">
+                            <div><span style="color:#888;">Высота:</span> <span id="printStelaHeight" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                            <div><span style="color:#888;">Ширина:</span> <span id="printStelaWidth" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                            <div><span style="color:#888;">Толщина:</span> <span id="printStelaDepth" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                            <div><span style="color:#888;">Материал:</span> <span id="printStelaMaterial" style="color:#4CAF50; font-weight:bold;">-</span></div>
                         </div>
                     </div>
                     
-                    <!-- СТРАНИЦА 2 - ПАРАМЕТРЫ -->
-                    <div class="print-page-params" style="padding:20px 30px; min-height:100vh;">
-                        <h2 style="text-align:center; color:#4CAF50; margin-bottom:20px; font-size:24px; border-bottom:2px solid #4CAF50; padding-bottom:10px;">📋 Детали заказа</h2>
-                        
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
-                            <div style="background:#1a2a1a; padding:12px 16px; border-radius:8px; border:1px solid #2a4a2a;">
-                                <h4 style="color:#4CAF50; margin-bottom:8px; font-size:14px;">📐 Параметры стеллы</h4>
-                                <div style="font-size:13px; color:#ccc; line-height:1.8;">
-                                    <div><span style="color:#888;">Высота:</span> <span id="printStelaHeight">2000 мм</span></div>
-                                    <div><span style="color:#888;">Ширина:</span> <span id="printStelaWidth">1200 мм</span></div>
-                                    <div><span style="color:#888;">Толщина:</span> <span id="printStelaDepth">200 мм</span></div>
-                                    <div><span style="color:#888;">Материал:</span> <span id="printStelaMaterial">Гранит</span></div>
-                                </div>
-                            </div>
-                            <div style="background:#1a2a1a; padding:12px 16px; border-radius:8px; border:1px solid #2a4a2a;">
-                                <h4 style="color:#4CAF50; margin-bottom:8px; font-size:14px;">🖼️ Размеры гравировки</h4>
-                                <div style="font-size:13px; color:#ccc; line-height:1.8;">
-                                    <div><span style="color:#888;">Ширина:</span> <span id="printEngravingWidth">-</span></div>
-                                    <div><span style="color:#888;">Высота:</span> <span id="printEngravingHeight">-</span></div>
-                                    <div><span style="color:#888;">Масштаб:</span> <span id="printEngravingScale">-</span></div>
-                                    <div><span style="color:#888;">Положение:</span> <span id="printEngravingPosition">-</span></div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div style="background:#1a1a1a; padding:10px 16px; border-radius:8px; border:1px solid #333; margin-bottom:15px;">
-                            <h4 style="color:#4CAF50; margin-bottom:6px; font-size:13px;">✂️ Отступы от края стеллы</h4>
-                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px; font-size:13px; color:#ccc;">
-                                <div><span style="color:#888;">Сверху:</span> <span id="printCropTopParam">-</span></div>
-                                <div><span style="color:#888;">Снизу:</span> <span id="printCropBottomParam">-</span></div>
-                                <div><span style="color:#888;">Слева:</span> <span id="printCropLeftParam">-</span></div>
-                                <div><span style="color:#888;">Справа:</span> <span id="printCropRightParam">-</span></div>
-                            </div>
-                        </div>
-                        
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; font-size:13px; color:#ccc;">
-                            <div style="background:#222; padding:10px 14px; border-radius:8px;">
-                                <h4 style="color:#4CAF50; margin-bottom:6px;">🎨 Параметры обработки</h4>
-                                <div><span style="color:#888;">Режим:</span> <span id="printMode">-</span></div>
-                                <div><span style="color:#888;">Форма:</span> <span id="printShape">-</span></div>
-                                <div><span style="color:#888;">Глубина:</span> <span id="printDepth">-</span></div>
-                                <div><span style="color:#888;">Ореол:</span> <span id="printHalo">-</span></div>
-                                <div><span style="color:#888;">Контраст:</span> <span id="printContrast">-</span></div>
-                                <div><span style="color:#888;">Яркость:</span> <span id="printBrightness">-</span></div>
-                                <div><span style="color:#888;">Камень:</span> <span id="printStone">-</span></div>
-                                <div><span style="color:#888;">Текстура:</span> <span id="printTexture">-</span></div>
-                            </div>
-                            <div style="background:#222; padding:10px 14px; border-radius:8px;">
-                                <h4 style="color:#4CAF50; margin-bottom:6px;">📐 Позиция на стеле</h4>
-                                <div><span style="color:#888;">Масштаб:</span> <span id="printScale">-</span></div>
-                                <div><span style="color:#888;">Смещение X:</span> <span id="printOffsetX">-</span></div>
-                                <div><span style="color:#888;">Смещение Y:</span> <span id="printOffsetY">-</span></div>
-                                <div><span style="color:#888;">Смещение Z:</span> <span id="printOffsetZ">-</span></div>
-                            </div>
-                        </div>
-                        
-                        <div style="background:#1a2a1a; padding:10px 16px; border-radius:8px; border:1px solid #2a4a2a; margin-top:15px; text-align:center;">
-                            <h4 style="color:#4CAF50; margin-bottom:6px; font-size:14px;">✅ Согласие</h4>
-                            <div style="display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;">
-                                <input type="checkbox" id="agreeCheckbox" style="width:18px; height:18px; accent-color:#4CAF50;">
-                                <label for="agreeCheckbox" style="color:#ccc; font-size:13px;">
-                                    Я ознакомился(ась) с эскизом и согласен(на) с расположением и качеством гравировки
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="print-signatures" style="display:flex; justify-content:space-between; margin-top:15px; padding-top:15px; border-top:2px solid #444; gap:30px;">
-                            <div style="flex:1;">
-                                <div class="signature-label" style="font-weight:bold; color:#4CAF50; margin-bottom:3px; font-size:15px;">ИСПОЛНИТЕЛЬ</div>
-                                <div class="signature-company" style="color:#aaa; font-size:12px; margin-bottom:3px;">ООО "Память"</div>
-                                <div style="margin-top:5px;">
-                                    <input type="text" id="executorName" placeholder="ФИО исполнителя" style="width:100%; padding:5px 8px; border-radius:4px; border:1px solid #555; background:#2a2a2a; color:#fff; font-size:12px;">
-                                </div>
-                                <div style="margin-top:3px;">
-                                    <input type="text" id="executorPosition" placeholder="Должность" style="width:100%; padding:5px 8px; border-radius:4px; border:1px solid #555; background:#2a2a2a; color:#fff; font-size:12px;">
-                                </div>
-                                <div class="signature-line" style="border-bottom:1px solid #888; height:25px; margin-top:3px;"></div>
-                                <div class="signature-sub" style="color:#888; font-size:10px; margin-top:2px;">__________________ / подпись /</div>
-                            </div>
-                            
-                            <div style="flex:1;">
-                                <div class="signature-label" style="font-weight:bold; color:#4CAF50; margin-bottom:3px; font-size:15px;">ЗАКАЗЧИК</div>
-                                <div style="margin-top:5px;">
-                                    <input type="text" id="customerName" placeholder="ФИО заказчика" style="width:100%; padding:5px 8px; border-radius:4px; border:1px solid #555; background:#2a2a2a; color:#fff; font-size:12px;">
-                                </div>
-                                <div style="margin-top:3px;">
-                                    <input type="text" id="customerPhone" placeholder="Телефон" style="width:100%; padding:5px 8px; border-radius:4px; border:1px solid #555; background:#2a2a2a; color:#fff; font-size:12px;">
-                                </div>
-                                <div class="signature-line" style="border-bottom:1px solid #888; height:25px; margin-top:3px;"></div>
-                                <div class="signature-sub" style="color:#888; font-size:10px; margin-top:2px;">__________________ / подпись /</div>
-                            </div>
+                    <!-- 2. Размеры гравировки -->
+                    <div style="background:#1a2a1a; padding:10px 14px; border-radius:8px; border:1px solid #2a4a2a;">
+                        <h4 style="color:#4CAF50; margin-bottom:6px; font-size:13px;">🖼️ Размеры гравировки</h4>
+                        <div style="font-size:12px; color:#ccc; line-height:1.6;">
+                            <div><span style="color:#888;">Ширина:</span> <span id="printEngravingWidth" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                            <div><span style="color:#888;">Высота:</span> <span id="printEngravingHeight" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                            <div><span style="color:#888;">Масштаб:</span> <span id="printEngravingScale" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                            <div><span style="color:#888;">Положение:</span> <span id="printEngravingPosition" style="color:#4CAF50; font-weight:bold;">-</span></div>
                         </div>
                     </div>
                     
-                    <div style="display:flex; gap:10px; margin-top:15px; justify-content:center; flex-wrap:wrap;">
-                        <button onclick="printDocument()" id="printAgreeBtn" class="btn btn-primary" disabled style="padding:10px 25px; flex:none;">🖨️ Печать</button>
-                        <button onclick="closePrintForm()" class="btn btn-action" style="padding:10px 25px; flex:none;">✕ Закрыть</button>
+                    <!-- 3. Отступы от края стеллы -->
+                    <div style="background:#1a2a1a; padding:10px 14px; border-radius:8px; border:1px solid #2a4a2a;">
+                        <h4 style="color:#4CAF50; margin-bottom:6px; font-size:13px;">✂️ Отступы от края</h4>
+                        <div style="font-size:12px; color:#ccc; line-height:1.6;">
+                            <div><span style="color:#888;">Сверху:</span> <span id="printCropTopParam" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                            <div><span style="color:#888;">Снизу:</span> <span id="printCropBottomParam" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                            <div><span style="color:#888;">Слева:</span> <span id="printCropLeftParam" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                            <div><span style="color:#888;">Справа:</span> <span id="printCropRightParam" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 4. Позиция на стеле -->
+                    <div style="background:#1a2a1a; padding:10px 14px; border-radius:8px; border:1px solid #2a4a2a;">
+                        <h4 style="color:#4CAF50; margin-bottom:6px; font-size:13px;">📐 Позиция на стеле</h4>
+                        <div style="font-size:12px; color:#ccc; line-height:1.6;">
+                            <div><span style="color:#888;">Масштаб:</span> <span id="printScale" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                            <div><span style="color:#888;">Смещение X:</span> <span id="printOffsetX" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                            <div><span style="color:#888;">Смещение Y:</span> <span id="printOffsetY" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                            <div><span style="color:#888;">Смещение Z:</span> <span id="printOffsetZ" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 5. Параметры обработки -->
+                    <div class="params-full-width" style="background:#1a2a1a; padding:10px 14px; border-radius:8px; border:1px solid #2a4a2a; grid-column: span 2;">
+                        <h4 style="color:#4CAF50; margin-bottom:6px; font-size:13px;">🎨 Параметры обработки</h4>
+                        <div class="params-inner-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:4px 20px; font-size:12px; color:#ccc; line-height:1.6;">
+                            <div><span style="color:#888;">Режим:</span> <span id="printMode" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                            <div><span style="color:#888;">Форма:</span> <span id="printShape" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                            <div><span style="color:#888;">Глубина:</span> <span id="printDepth" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                            <div><span style="color:#888;">Ореол:</span> <span id="printHalo" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                            <div><span style="color:#888;">Контраст:</span> <span id="printContrast" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                            <div><span style="color:#888;">Яркость:</span> <span id="printBrightness" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                            <div><span style="color:#888;">Камень:</span> <span id="printStone" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                            <div><span style="color:#888;">Текстура:</span> <span id="printTexture" style="color:#4CAF50; font-weight:bold;">-</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Согласие -->
+                <div class="print-agreement" style="background:#1a2a1a; padding:10px 16px; border-radius:8px; border:1px solid #2a4a2a; margin-top:12px; text-align:center;">
+                    <h4 style="color:#4CAF50; margin-bottom:6px; font-size:14px;">✅ Согласие</h4>
+                    <div style="display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;">
+                        <input type="checkbox" id="agreeCheckbox" style="width:16px; height:16px; accent-color:#4CAF50;">
+                        <label for="agreeCheckbox" style="color:#ccc; font-size:12px;">Я ознакомился(ась) с эскизом и согласен(на) с расположением и качеством гравировки</label>
+                    </div>
+                </div>
+                
+                <!-- Подписи -->
+                <div class="print-signatures" style="display:flex; justify-content:space-between; margin-top:12px; padding-top:12px; border-top:2px solid #444; gap:20px;">
+                    <div style="flex:1;">
+                        <div style="font-weight:bold; color:#4CAF50; margin-bottom:3px; font-size:14px;">ИСПОЛНИТЕЛЬ</div>
+                        <div style="color:#aaa; font-size:11px; margin-bottom:3px;">ООО "Память"</div>
+                        <div style="margin-top:4px;">
+                            <input type="text" id="executorName" placeholder="ФИО исполнителя" style="width:100%; padding:4px 8px; border-radius:4px; border:1px solid #555; background:#2a2a2a; color:#fff; font-size:11px;">
+                        </div>
+                        <div style="margin-top:2px;">
+                            <input type="text" id="executorPosition" placeholder="Должность" style="width:100%; padding:4px 8px; border-radius:4px; border:1px solid #555; background:#2a2a2a; color:#fff; font-size:11px;">
+                        </div>
+                        <div style="border-bottom:1px solid #888; height:20px; margin-top:2px;"></div>
+                        <div style="color:#888; font-size:9px; margin-top:2px;">__________________ / подпись /</div>
+                    </div>
+                    <div style="flex:1;">
+                        <div style="font-weight:bold; color:#4CAF50; margin-bottom:3px; font-size:14px;">ЗАКАЗЧИК</div>
+                        <div style="margin-top:4px;">
+                            <input type="text" id="customerName" placeholder="ФИО заказчика" style="width:100%; padding:4px 8px; border-radius:4px; border:1px solid #555; background:#2a2a2a; color:#fff; font-size:11px;">
+                        </div>
+                        <div style="margin-top:2px;">
+                            <input type="text" id="customerPhone" placeholder="Телефон" style="width:100%; padding:4px 8px; border-radius:4px; border:1px solid #555; background:#2a2a2a; color:#fff; font-size:11px;">
+                        </div>
+                        <div style="border-bottom:1px solid #888; height:20px; margin-top:2px;"></div>
+                        <div style="color:#888; font-size:9px; margin-top:2px;">__________________ / подпись /</div>
                     </div>
                 </div>
             </div>
+            
+        </div>
+        
+        <div style="display:flex; gap:10px; margin-top:15px; justify-content:center; flex-wrap:wrap;">
+            <button onclick="printDocument()" id="printAgreeBtn" class="btn btn-primary" disabled style="padding:10px 25px; flex:none;">🖨️ Печать</button>
+            <button onclick="closePrintForm()" class="btn btn-action" style="padding:10px 25px; flex:none;">✕ Закрыть</button>
         </div>
     </div>
+</div>
 
     <!-- Модальное окно оформления заказа -->
     <div id="orderModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; padding:20px;">

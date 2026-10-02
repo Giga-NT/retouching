@@ -1,6 +1,8 @@
-<<<<<<< HEAD
 <?php
-// send_mail.php - Отправка писем через PHP
+// send_mail.php - Отправка через Gmail SMTP
+
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 header('Content-Type: application/json');
 
@@ -12,109 +14,102 @@ if (!$data) {
     exit;
 }
 
-// Настройки
-$to = 'gipsogen2008@gmail.com';
-$subject = $data['subject'] ?? 'Новый заказ из Стелы';
+// ===== НАСТРОЙКИ GMAIL =====
+$gmail = 'gipsogen2008@gmail.com';        // ВАШ EMAIL
+$password = 'kokmpwrjxnsspjof';       // ПАРОЛЬ ПРИЛОЖЕНИЯ
+
+// Подключаем PHPMailer
+require_once __DIR__ . '/PHPMailer/src/PHPMailer.php';
+require_once __DIR__ . '/PHPMailer/src/SMTP.php';
+require_once __DIR__ . '/PHPMailer/src/Exception.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
 
 // Формируем письмо
+$to = 'gipsogen2008@gmail.com';
+$subject = $data['subject'] ?? 'Новый заказ из Стелы #' . date('His');
+
 $message = "📋 НОВЫЙ ЗАКАЗ\n";
-$message .= "=" . str_repeat("=", 40) . "\n\n";
+$message .= str_repeat("=", 50) . "\n\n";
 
 $message .= "👤 КЛИЕНТ:\n";
-$message .= "ФИО: " . ($data['client_name'] ?? 'Не указано') . "\n";
-$message .= "Телефон: " . ($data['client_phone'] ?? 'Не указано') . "\n";
-$message .= "Email: " . ($data['client_email'] ?? 'Не указано') . "\n\n";
+$message .= "  ФИО: " . ($data['client_name'] ?? 'Не указано') . "\n";
+$message .= "  Телефон: " . ($data['client_phone'] ?? 'Не указано') . "\n";
+$message .= "  Email: " . ($data['client_email'] ?? 'Не указано') . "\n\n";
 
-$message .= "🗿 ПАРАМЕТРЫ:\n";
-$message .= "Режим: " . ($data['mode'] == 'engraving' ? 'Гравировка' : 'Фото-декаль') . "\n";
-$message .= "Камень: " . ($data['stone'] ?? 'Классический') . "\n";
-$message .= "Форма: " . ($data['shape'] ?? 'Без формы') . "\n";
-$message .= "Масштаб: " . ($data['scale'] ?? '0.8') . "\n\n";
+$message .= "🗿 ПАРАМЕТРЫ ЗАКАЗА:\n";
+$message .= "  Режим: " . ($data['mode'] == 'engraving' ? 'Гравировка' : 'Фото-декаль') . "\n";
+$message .= "  Камень: " . ($data['stone'] ?? 'Классический') . "\n";
+$message .= "  Форма: " . ($data['shape'] ?? 'Без формы') . "\n";
+$message .= "  Масштаб: " . ($data['scale'] ?? '0.8') . "\n";
+$message .= "  Текстура: " . ($data['texture'] ?? 'Нет') . "\n\n";
 
 $message .= "🎨 ОБРАБОТКА:\n";
-$message .= "Глубина: " . ($data['depth'] ?? '0.9') . "\n";
-$message .= "Ореол: " . ($data['halo'] ?? '35') . "\n";
-$message .= "Контраст: " . ($data['contrast'] ?? '3.0') . "\n";
-$message .= "Яркость: " . ($data['brightness'] ?? '0') . "\n\n";
+$message .= "  Глубина: " . ($data['depth'] ?? '0.9') . "\n";
+$message .= "  Ореол: " . ($data['halo'] ?? '35') . "\n";
+$message .= "  Контраст: " . ($data['contrast'] ?? '3.0') . "\n";
+$message .= "  Яркость: " . ($data['brightness'] ?? '0') . "\n\n";
+
+$message .= "📐 ПОЗИЦИЯ:\n";
+$message .= "  Смещение X: " . ($data['offset_x'] ?? '0') . "\n";
+$message .= "  Смещение Y: " . ($data['offset_y'] ?? '0') . "\n";
+$message .= "  Смещение Z: " . ($data['offset_z'] ?? '-0.1') . "\n\n";
+
+$message .= "✂️ ОТСТУПЫ:\n";
+$message .= "  Сверху: " . ($data['crop_top'] ?? '2') . "%\n";
+$message .= "  Снизу: " . ($data['crop_bottom'] ?? '2') . "%\n";
+$message .= "  Слева: " . ($data['crop_left'] ?? '2') . "%\n";
+$message .= "  Справа: " . ($data['crop_right'] ?? '2') . "%\n\n";
 
 if (!empty($data['notes'])) {
     $message .= "💬 КОММЕНТАРИЙ:\n";
-    $message .= $data['notes'] . "\n\n";
+    $message .= "  " . $data['notes'] . "\n\n";
 }
 
-$message .= "📅 " . date('d.m.Y H:i') . "\n";
-$message .= str_repeat("=", 50);
+$message .= str_repeat("=", 50) . "\n";
+$message .= "📅 " . date('d.m.Y H:i:s') . "\n";
 
-// Заголовки
-$headers = "From: stela@localhost\r\n";
-$headers .= "Reply-To: " . ($data['client_email'] ?? 'no-reply@stela.ru') . "\r\n";
-$headers .= "Content-Type: text/plain; charset=utf-8\r\n";
-$headers .= "Content-Transfer-Encoding: 8bit\r\n";
+// ===== ОТПРАВКА =====
+$mail = new PHPMailer(true);
 
-// Отправляем
-$result = mail($to, $subject, $message, $headers);
+try {
+    // Настройки сервера
+    $mail->SMTPDebug = 0; // 0 - отключить отладку, 1 - ошибки, 2 - подробно
+    $mail->isSMTP();
+    $mail->Host = 'smtp.gmail.com';
+    $mail->SMTPAuth = true;
+    $mail->Username = $gmail;
+    $mail->Password = $password;
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port = 587;
+    $mail->CharSet = 'UTF-8';
 
-echo json_encode([
-    'success' => $result,
-    'message' => $result ? 'Письмо отправлено' : 'Ошибка отправки'
-=======
-<?php
-// send_mail.php - Отправка писем через PHP
+    // Отправитель и получатель
+    $mail->setFrom($gmail, 'Стела');
+    $mail->addAddress($to);
+    
+    // Если указан email клиента - добавляем в копию
+    if (!empty($data['client_email']) && filter_var($data['client_email'], FILTER_VALIDATE_EMAIL)) {
+        $mail->addReplyTo($data['client_email']);
+    }
 
-header('Content-Type: application/json');
+    // Контент
+    $mail->isHTML(false);
+    $mail->Subject = $subject;
+    $mail->Body = $message;
 
-// Получаем данные
-$data = json_decode(file_get_contents('php://input'), true);
-
-if (!$data) {
-    echo json_encode(['success' => false, 'error' => 'Нет данных']);
-    exit;
+    $mail->send();
+    
+    echo json_encode([
+        'success' => true,
+        'message' => 'Письмо отправлено на ' . $to
+    ]);
+    
+} catch (Exception $e) {
+    echo json_encode([
+        'success' => false,
+        'error' => 'Ошибка отправки: ' . $mail->ErrorInfo
+    ]);
 }
-
-// Настройки
-$to = 'gipsogen2008@gmail.com';
-$subject = $data['subject'] ?? 'Новый заказ из Стелы';
-
-// Формируем письмо
-$message = "📋 НОВЫЙ ЗАКАЗ\n";
-$message .= "=" . str_repeat("=", 40) . "\n\n";
-
-$message .= "👤 КЛИЕНТ:\n";
-$message .= "ФИО: " . ($data['client_name'] ?? 'Не указано') . "\n";
-$message .= "Телефон: " . ($data['client_phone'] ?? 'Не указано') . "\n";
-$message .= "Email: " . ($data['client_email'] ?? 'Не указано') . "\n\n";
-
-$message .= "🗿 ПАРАМЕТРЫ:\n";
-$message .= "Режим: " . ($data['mode'] == 'engraving' ? 'Гравировка' : 'Фото-декаль') . "\n";
-$message .= "Камень: " . ($data['stone'] ?? 'Классический') . "\n";
-$message .= "Форма: " . ($data['shape'] ?? 'Без формы') . "\n";
-$message .= "Масштаб: " . ($data['scale'] ?? '0.8') . "\n\n";
-
-$message .= "🎨 ОБРАБОТКА:\n";
-$message .= "Глубина: " . ($data['depth'] ?? '0.9') . "\n";
-$message .= "Ореол: " . ($data['halo'] ?? '35') . "\n";
-$message .= "Контраст: " . ($data['contrast'] ?? '3.0') . "\n";
-$message .= "Яркость: " . ($data['brightness'] ?? '0') . "\n\n";
-
-if (!empty($data['notes'])) {
-    $message .= "💬 КОММЕНТАРИЙ:\n";
-    $message .= $data['notes'] . "\n\n";
-}
-
-$message .= "📅 " . date('d.m.Y H:i') . "\n";
-$message .= str_repeat("=", 50);
-
-// Заголовки
-$headers = "From: stela@localhost\r\n";
-$headers .= "Reply-To: " . ($data['client_email'] ?? 'no-reply@stela.ru') . "\r\n";
-$headers .= "Content-Type: text/plain; charset=utf-8\r\n";
-$headers .= "Content-Transfer-Encoding: 8bit\r\n";
-
-// Отправляем
-$result = mail($to, $subject, $message, $headers);
-
-echo json_encode([
-    'success' => $result,
-    'message' => $result ? 'Письмо отправлено' : 'Ошибка отправки'
->>>>>>> 8e734ba9ce21e78239c78bba23747082f52e579a
-]);
